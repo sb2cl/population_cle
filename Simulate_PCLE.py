@@ -77,9 +77,9 @@ Ncells = 240
 ruido = 0.15
 ahl_e_0 = 0/Vc
 STO = 1							# STO = 0 is deterministic simulation, and STO = 1 is stochastic.
-HISTO = 1						# HISTO = 1 for obtaining the steady state histogram
+HISTO = 0						# HISTO = 1 for obtaining the steady state histogram
 TEMPO =  1						# TEMPO = 1 For obtaining the temporal response of the means and std
-TEMPOT =  1						# TEMPOT = 1 For obtaining the temporal response of all cells
+TEMPOT =  0						# TEMPOT = 1 For obtaining the temporal response of all cells
 
 print('Saving params...')
 # Params list
