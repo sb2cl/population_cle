@@ -11,11 +11,11 @@
 
 	// Definition of molecules indexes (for concentration fiels)
 
-const size_t LuxI = 0;
-const size_t LuxR = 1;
-const size_t LuxRAHL2 = 2;
-const size_t AHL = 3;
-const size_t Monomer = 4;
+const size_t I = 0;
+const size_t R = 1;
+const size_t RA2 = 2;
+const size_t A = 3;
+const size_t RA = 4;
 
 const size_t Parameters = 5;
 
@@ -29,7 +29,7 @@ void evolve_time(  grid_dist_id<2,  double, aggregate< double, double, double, d
 	Vcluster<> & v_cl = create_vcluster();
 
 	  //Init means
-	double tot_AHL_partial = 0.0;
+	double tot_A_partial = 0.0;
 	double x1mean = 0.0;
 	double x1var = 0.0;
 	double x2mean = 0.0;
@@ -61,15 +61,15 @@ void evolve_time(  grid_dist_id<2,  double, aggregate< double, double, double, d
 
 	    // Copy parameters from the distributed grid variable Parameters into the named variables
 
-	    // //LuxI parameters
+	    // //I parameters
 		double dI = g_dist_read.template get<Parameters>(key)[0];
 		double pI = g_dist_read.template get<Parameters>(key)[1];
 		double kI = g_dist_read.template get<Parameters>(key)[2];
-		double pN_luxI = g_dist_read.template get<Parameters>(key)[3];
+		double pN_I = g_dist_read.template get<Parameters>(key)[3];
 		double dmI = g_dist_read.template get<Parameters>(key)[4];
 		double kdLux = g_dist_read.template get<Parameters>(key)[5];
 		double alphaI = g_dist_read.template get<Parameters>(key)[6];
-	    //LuxR Parameters
+	    //R Parameters
 		double dR = g_dist_read.template get<Parameters>(key)[7];
 		double pR = g_dist_read.template get<Parameters>(key)[8];
 		double cR =  g_dist_read.template get<Parameters>(key)[9];
@@ -80,39 +80,39 @@ void evolve_time(  grid_dist_id<2,  double, aggregate< double, double, double, d
 		double k_2 = g_dist_read.template get<Parameters>(key)[13];
 		double kd2 = g_dist_read.template get<Parameters>(key)[14];
 		double dRA2 = g_dist_read.template get<Parameters>(key)[15];
-	    // AHL parameters
+	    // A parameters
 		double kA =  g_dist_read.template get<Parameters>(key)[16];
 		double dA = g_dist_read.template get<Parameters>(key)[17];
 		double D =  g_dist_read.template get<Parameters>(key)[18];
 		double Vcell =  g_dist_read.template get<Parameters>(key)[19];
 		double Vext =  g_dist_read.template get<Parameters>(key)[20];
 
-	    // Monomer parameter
+	    // RA parameter
 		double dRA = g_dist_read.template get<Parameters>(key)[21];
 
 
 	    // Propensities
-	    // LuxI 
-		double X11 = dI * g_dist_read.template get<LuxI>(key);
-		double c1 = (pI * kI * pN_luxI)/dmI;
-		double c2 = 1/(kdLux + g_dist_read.template get<LuxRAHL2>(key));
-		double X12 = c1*c2*(kdLux + alphaI * g_dist_read.template get<LuxRAHL2>(key));
+	    // I 
+		double X11 = dI * g_dist_read.template get<I>(key);
+		double c1 = (pI * kI * pN_I)/dmI;
+		double c2 = 1/(kdLux + g_dist_read.template get<RA2>(key));
+		double X12 = c1*c2*(kdLux + alphaI * g_dist_read.template get<RA2>(key));
 
-	    // LuxR
-		double  X21 = dR * g_dist_read.template get<LuxR>(key);
+	    // R
+		double  X21 = dR * g_dist_read.template get<R>(key);
 		double  X22 = pR*cR/dmR;
-		double  X23 = k_1 * g_dist_read.template get<Monomer>(key);
-		double  X24 = ( k_1 / kd1 ) * g_dist_read.template get<LuxR>(key) * g_dist_read.template get<AHL>(key);
+		double  X23 = k_1 * g_dist_read.template get<RA>(key);
+		double  X24 = ( k_1 / kd1 ) * g_dist_read.template get<R>(key) * g_dist_read.template get<A>(key);
 
-	    // LuxRAHL2
-		double X31 = (k_2 + dRA2)* g_dist_read.template get<LuxRAHL2>(key);
-		double X32 = k_2 * g_dist_read.template get<Monomer>(key) * g_dist_read.template get<Monomer>(key) / kd2;
+	    // RA2
+		double X31 = (k_2 + dRA2)* g_dist_read.template get<RA2>(key);
+		double X32 = k_2 * g_dist_read.template get<RA>(key) * g_dist_read.template get<RA>(key) / kd2;
 
-	    // AHL
+	    // A
 		double X41 = X23;
-		double X42 = kA * g_dist_read.template get<LuxI>(key);
-		double X43 = dA * g_dist_read.template get<AHL>(key);
-		double X44 = D * (Vcell/Vext * x5.last() - g_dist_read.template get<AHL>(key));
+		double X42 = kA * g_dist_read.template get<I>(key);
+		double X43 = dA * g_dist_read.template get<A>(key);
+		double X44 = D * (Vcell/Vext * x5.last() - g_dist_read.template get<A>(key));
 		double X45 = X24;
 
 	    // Noises
@@ -138,7 +138,7 @@ void evolve_time(  grid_dist_id<2,  double, aggregate< double, double, double, d
 			x4_noise_difu = 0;
 		}
 
-	    // Deterministic part with stoicheometry included
+	    // Deterministic and stochastic terms with stoicheometry included
 		double x1_det = T*( -X11 + X12 );
 		double x1_sto = sT*( -sqrt(std::abs(X11))*x1_noise1 + sqrt(std::abs(X12))*x1_noise2 );
 
@@ -152,48 +152,48 @@ void evolve_time(  grid_dist_id<2,  double, aggregate< double, double, double, d
 		double x4_sto = sT*( sqrt(std::abs(X41))*x4_noise1 + sqrt(std::abs(X42))*x4_noise2 - sqrt(std::abs(X43))*x4_noise3 + sqrt(std::abs(X44))*x4_noise_difu - sqrt(std::abs(X45))*x4_noise5 );
 
 	    // Compute new value
-		g_dist_write.template get<LuxI>(key) = g_dist_read.template get<LuxI>(key) + x1_det + x1_sto;
-		g_dist_write.template get<LuxR>(key) = g_dist_read.template get<LuxR>(key) + x2_det + x2_sto;
-		g_dist_write.template get<LuxRAHL2>(key) = g_dist_read.template get<LuxRAHL2>(key) + x3_det + x3_sto;
-		g_dist_write.template get<AHL>(key) = g_dist_read.template get<AHL>(key) + x4_det + x4_sto;
+		g_dist_write.template get<I>(key) = g_dist_read.template get<I>(key) + x1_det + x1_sto;
+		g_dist_write.template get<R>(key) = g_dist_read.template get<R>(key) + x2_det + x2_sto;
+		g_dist_write.template get<RA2>(key) = g_dist_read.template get<RA2>(key) + x3_det + x3_sto;
+		g_dist_write.template get<A>(key) = g_dist_read.template get<A>(key) + x4_det + x4_sto;
 
-		if ( g_dist_write.template get<LuxI>(key) < 0 ) {
-			g_dist_write.template get<LuxI>(key) = 0;
+		if ( g_dist_write.template get<I>(key) < 0 ) {
+			g_dist_write.template get<I>(key) = 0;
 		}
-		if ( g_dist_write.template get<LuxR>(key) < 0 ) {
-			g_dist_write.template get<LuxR>(key) = 0;
+		if ( g_dist_write.template get<R>(key) < 0 ) {
+			g_dist_write.template get<R>(key) = 0;
 		}
-		if ( g_dist_write.template get<LuxRAHL2>(key) < 0 ) {
-			g_dist_write.template get<LuxRAHL2>(key) = 0;
+		if ( g_dist_write.template get<RA2>(key) < 0 ) {
+			g_dist_write.template get<RA2>(key) = 0;
 		}
-		if ( g_dist_write.template get<AHL>(key) < 0 ) {
-			g_dist_write.template get<AHL>(key) = 0;
+		if ( g_dist_write.template get<A>(key) < 0 ) {
+			g_dist_write.template get<A>(key) = 0;
 		}
 
-	    // Algebraic restriction
-		double c6 = 2*k_2*kd1*g_dist_write.template get<LuxRAHL2>(key) + k_1 * g_dist_write.template get<LuxR>(key) * g_dist_write.template get<AHL>(key);
+	    // Algebraic constraints
+		double c6 = 2*k_2*kd1*g_dist_write.template get<RA2>(key) + k_1 * g_dist_write.template get<R>(key) * g_dist_write.template get<A>(key);
 		double c7 = 8*k_2*c6;
 		double c8 = k_1 + dRA;
 		double c9 = (kd1*kd2)*c8*c8;
 		double c10 = (kd2*c8)/(4*k_2);
 		double c11 = c7/c9 + 1;
-	    g_dist_write.template get<Monomer>(key)  = c10*(sqrt(std::abs(c11)) - 1);  //% This is LuxR.AHL
+	    g_dist_write.template get<RA>(key)  = c10*(sqrt(std::abs(c11)) - 1);  //% This is R.A
 
-	    // Write the partial value of AHLext from the present cell.
-	    tot_AHL_partial += T* (-1)* X44 + sT * (-1) * sqrt(std::abs(X44))*x4_noise_difu;
+	    // Write the partial value of Ae from the present cell.
+	    tot_A_partial += T* (-1)* X44 + sT * (-1) * sqrt(std::abs(X44))*x4_noise_difu;
 
 	    // Add to the mean the term corresponding to the present cell.
-	    x1mean += g_dist_write.template get<LuxI>(key)/ Ncells;
-	    x2mean += g_dist_write.template get<LuxR>(key)/ Ncells;
-	    x3mean += g_dist_write.template get<LuxRAHL2>(key)/ Ncells;
-	    x4mean += g_dist_write.template get<AHL>(key)/ Ncells;
+	    x1mean += g_dist_write.template get<I>(key)/ Ncells;
+	    x2mean += g_dist_write.template get<R>(key)/ Ncells;
+	    x3mean += g_dist_write.template get<RA2>(key)/ Ncells;
+	    x4mean += g_dist_write.template get<A>(key)/ Ncells;
 
 	    // Increment domain iterator.
 	    ++dome;
 	}
 
-	  // Excecute the sum of the means and AHL_partial over all the processors
-	v_cl.sum(  tot_AHL_partial );
+	  // Excecute the sum of the means and A_partial over all the processors
+	v_cl.sum(  tot_A_partial );
 	v_cl.sum(  x1mean );
 	v_cl.sum(  x2mean );
 	v_cl.sum(  x3mean );
@@ -208,10 +208,10 @@ void evolve_time(  grid_dist_id<2,  double, aggregate< double, double, double, d
 		auto key = dom_var.get();
 
 	    //Calculate the variance incrementaly by adding the term corresponding to the i-th cell (with the iterator)
-		x1var += (g_dist_write.template get<LuxI>(key)-x1mean)*(g_dist_write.template get<LuxI>(key)-x1mean)/(Ncells-1);
-		x2var += (g_dist_write.template get<LuxR>(key)-x2mean)*(g_dist_write.template get<LuxR>(key)-x2mean)/(Ncells-1);
-		x3var += (g_dist_write.template get<LuxRAHL2>(key)-x3mean)*(g_dist_write.template get<LuxRAHL2>(key)-x3mean)/(Ncells-1);
-		x4var += (g_dist_write.template get<AHL>(key)-x4mean)*(g_dist_write.template get<AHL>(key)-x4mean)/(Ncells-1);
+		x1var += (g_dist_write.template get<I>(key)-x1mean)*(g_dist_write.template get<I>(key)-x1mean)/(Ncells-1);
+		x2var += (g_dist_write.template get<R>(key)-x2mean)*(g_dist_write.template get<R>(key)-x2mean)/(Ncells-1);
+		x3var += (g_dist_write.template get<RA2>(key)-x3mean)*(g_dist_write.template get<RA2>(key)-x3mean)/(Ncells-1);
+		x4var += (g_dist_write.template get<A>(key)-x4mean)*(g_dist_write.template get<A>(key)-x4mean)/(Ncells-1);
 	    // Increment domain iterator.
 		++dom_var;
 	}
@@ -238,7 +238,7 @@ void evolve_time(  grid_dist_id<2,  double, aggregate< double, double, double, d
 	double x5_sto = sT*(-sqrt( std::abs(dAe * x5.last()) )*x5_noise);
 	  //Calculate the new x5 value
 
-	double x5to_add = x5.last() + T*(- dAe * x5.last() ) + x5_sto + tot_AHL_partial;
+	double x5to_add = x5.last() + T*(- dAe * x5.last() ) + x5_sto + tot_A_partial;
 
 	  //Add the las calculated value to x5 vector
 	x5.add( x5to_add );
@@ -272,11 +272,11 @@ void input_data(grid_dist_id<2,  double, aggregate< double, double, double, doub
 	    // Get the actual position from the iterator in the subdomain
 		auto key = dom_init.get();
 	    // Initialize the grid
-		g1.template get<LuxI>(key) = 0.0;
-		g1.template get<LuxR>(key) = 0.0;
-		g1.template get<LuxRAHL2>(key) = 0.0;
-		g1.template get<AHL>(key) = 0.0;
-		g1.template get<Monomer>(key) = 0.0;
+		g1.template get<I>(key) = 0.0;
+		g1.template get<R>(key) = 0.0;
+		g1.template get<RA2>(key) = 0.0;
+		g1.template get<A>(key) = 0.0;
+		g1.template get<RA>(key) = 0.0;
 
 		for (int l = 0; l < 19; l++)
 		{
@@ -328,7 +328,7 @@ int main(int argc, char* argv[])
 	double val3;
 	if (!(iss3 >> val3)) std::cerr << "Invalid number " << argv[3] << '\n';
 
-	  // The initial condition for AHL extrnal is the fourth argument
+	  // The initial condition for A extrnal is the fourth argument
 	std::istringstream iss4(argv[4]);
 	double val4;
 	if (!(iss4 >> val4)) std::cerr << "Invalid number " << argv[4] << '\n';
@@ -400,13 +400,13 @@ int main(int argc, char* argv[])
 	  openfpm::vector< double> x5;
 	  // Vector for the statistics, mean and variance
 	  openfpm::vector<openfpm::vector< double>> stats;
-	  // Vector for the histogram of LuxI at final values
-	  openfpm::vector<double> LuxI_hist;
-	    // Vector for the for the 4 states and all the cells (at time t) The first one is LuxI
+	  // Vector for the histogram of I at final values
+	  openfpm::vector<double> I_hist;
+	    // Vector for the for the 4 states and all the cells (at time t) The first one is I
 	  openfpm::vector<double> States_time_t;
-	  openfpm::vector<double> States_time_t_LuxR;
-	  openfpm::vector<double> States_time_t_LuxRAHL2;
-	  openfpm::vector<double> States_time_t_AHL;
+	  openfpm::vector<double> States_time_t_R;
+	  openfpm::vector<double> States_time_t_RA2;
+	  openfpm::vector<double> States_time_t_A;
 
 	  // Create a distributed grid in 2D
 	  grid_dist_id<2,  double, aggregate< double, double, double, double, double, double[23]>> g1(sz,domain,g);
@@ -480,9 +480,9 @@ int main(int argc, char* argv[])
 	  	{
 	      // Allocating memory for vector States_time_t
 	  		States_time_t.resize(0);
-	  		States_time_t_LuxR.resize(0);
-	  		States_time_t_LuxRAHL2.resize(0);
-	  		States_time_t_AHL.resize(0);
+	  		States_time_t_R.resize(0);
+	  		States_time_t_RA2.resize(0);
+	  		States_time_t_A.resize(0);
 
 	      // Here put the code to write all the variables into a text file, and append every time step
 		        // Save the last time point histogram
@@ -495,11 +495,11 @@ int main(int argc, char* argv[])
 	  		{
 	        // Get the actual position from the iterator in the subdomain
 	  			auto key = dom_hist.get();
-	        // Add the value to LuxI_hist
-	  			States_time_t.add(g1.template get<LuxI>(key));
-	  			States_time_t_LuxR.add(g1.template get<LuxR>(key));
-	  			States_time_t_LuxRAHL2.add(g1.template get<LuxRAHL2>(key));
-	  			States_time_t_AHL.add(g1.template get<AHL>(key));
+	        // Add the value to I_hist
+	  			States_time_t.add(g1.template get<I>(key));
+	  			States_time_t_R.add(g1.template get<R>(key));
+	  			States_time_t_RA2.add(g1.template get<RA2>(key));
+	  			States_time_t_A.add(g1.template get<A>(key));
 
 	        //Increment the counter
 	  			contad++;
@@ -514,61 +514,61 @@ int main(int argc, char* argv[])
 
 	      // Saving all the values into one processor
 	  		v_cl.SGather(States_time_t,States_col,0);
-	  		v_cl.SGather(States_time_t_LuxR,States_colR,0);
-	  		v_cl.SGather(States_time_t_LuxRAHL2,States_colRA,0);
-	  		v_cl.SGather(States_time_t_AHL,States_colA,0);
+	  		v_cl.SGather(States_time_t_R,States_colR,0);
+	  		v_cl.SGather(States_time_t_RA2,States_colRA,0);
+	  		v_cl.SGather(States_time_t_A,States_colA,0);
 
 		  // Write the files only from Processot number 0
 	  		if (v_cl.getProcessUnitID()==0 )
 	  		{
-	  			std::ofstream ofs_state_luxI ( "States_luxI.dat" , std::ofstream::out|std::ofstream::app);
-	  			std::ofstream ofs_state_luxR ( "States_luxR.dat" , std::ofstream::out|std::ofstream::app);
-	  			std::ofstream ofs_state_luxRAHL2 ( "States_luxRAHL2.dat" , std::ofstream::out|std::ofstream::app);
-	  			std::ofstream ofs_state_AHL ( "States_AHL.dat" , std::ofstream::out|std::ofstream::app);
+	  			std::ofstream ofs_state_I ( "States_I.dat" , std::ofstream::out|std::ofstream::app);
+	  			std::ofstream ofs_state_R ( "States_R.dat" , std::ofstream::out|std::ofstream::app);
+	  			std::ofstream ofs_state_RA2 ( "States_RA2.dat" , std::ofstream::out|std::ofstream::app);
+	  			std::ofstream ofs_state_A ( "States_A.dat" , std::ofstream::out|std::ofstream::app);
 
 	        // The time j
-	  			ofs_state_luxI << j*T;
-	  			ofs_state_luxR << j*T;
-	  			ofs_state_luxRAHL2 << j*T;
-	  			ofs_state_AHL << j*T;
+	  			ofs_state_I << j*T;
+	  			ofs_state_R << j*T;
+	  			ofs_state_RA2 << j*T;
+	  			ofs_state_A << j*T;
 
 	        // Value of the states for each cell
 	  			for (int m = 0 ; m < (States_col.size()-1) ; m++)
 	  			{
 	  				size_t numb = m+1;
-	  				ofs_state_luxI << ", " << States_col.get(m);
-	  				ofs_state_luxR << ", " << States_colR.get(m);
-	  				ofs_state_luxRAHL2 << ", " << States_colRA.get(m);
-	  				ofs_state_AHL << ", " << States_colA.get(m);
+	  				ofs_state_I << ", " << States_col.get(m);
+	  				ofs_state_R << ", " << States_colR.get(m);
+	  				ofs_state_RA2 << ", " << States_colRA.get(m);
+	  				ofs_state_A << ", " << States_colA.get(m);
 	  			}
 
-	  			ofs_state_luxI << std::endl;
-	  			ofs_state_luxR << std::endl;
-	  			ofs_state_luxRAHL2 << std::endl;
-	  			ofs_state_AHL << std::endl;
+	  			ofs_state_I << std::endl;
+	  			ofs_state_R << std::endl;
+	  			ofs_state_RA2 << std::endl;
+	  			ofs_state_A << std::endl;
 
-	  			ofs_state_luxI.close();
-	  			ofs_state_luxR.close();
-	  			ofs_state_luxRAHL2.close();
-	  			ofs_state_AHL.close();
+	  			ofs_state_I.close();
+	  			ofs_state_R.close();
+	  			ofs_state_RA2.close();
+	  			ofs_state_A.close();
 	  		}
 	  	}
 
-	   // To obtain the long-term histogram of the variable of interest (in this case LuxI)
+	   // To obtain the long-term histogram of the variable of interest (in this case I)
 	   if (j==N-2 && WRITE_OUTPUT_H ) //This is the last point.
 	   {
 	      // Save the last time point histogram
 	      // Create iterator for g1
 	   	auto dom_hist = g1.getDomainIterator();
 	   	size_t contad = 0;
-	   	LuxI_hist.resize(0);
+	   	I_hist.resize(0);
 	      //Iterate
 	   	while (dom_hist.isNext())
 	   	{
 	        // Get the actual position from the iterator in the subdomain
 	   		auto key = dom_hist.get();
-	        // Add the value to LuxI_hist
-	   		LuxI_hist.add(g1.template get<LuxI>(key));
+	        // Add the value to I_hist
+	   		I_hist.add(g1.template get<I>(key));
 
 	        //Increment the counter
 	   		contad++;
@@ -577,15 +577,15 @@ int main(int argc, char* argv[])
 	   	}
 	   	openfpm::vector<double> Lux_col;
 
-	      // Saving luxi histogram
-	   	v_cl.SGather(LuxI_hist,Lux_col,0);
+	      // Saving i histogram
+	   	v_cl.SGather(I_hist,Lux_col,0);
 
 
 	   	if (v_cl.getProcessUnitID()==0 )
 	   	{
-	   		std::ofstream ofs_hist ( "LuxI_hist.00" + std::to_string(j_hist), std::ofstream::out);
+	   		std::ofstream ofs_hist ( "I_hist.00" + std::to_string(j_hist), std::ofstream::out);
 
-	   		ofs_hist << "cell, luxI" << std::endl;
+	   		ofs_hist << "cell, I" << std::endl;
 
 	        //  ofs_var << counter << ", " << dR[n] << ", " << cR[m] << ", ";
 	   		for (int jjjj = 0 ; jjjj < Lux_col.size() ; jjjj++)
