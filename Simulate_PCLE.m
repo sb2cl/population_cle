@@ -1,11 +1,3 @@
-%   This function evaluates the objective functions J1=mean LuxI and J2=var LuxI. This is for optimization
-%   of the QS circuit at different parameter values according to the CLE in silico
-%   simulations for intrinsic noise.
-%   Parameters
-%   X:      is the vector containing the decision variables. %Fixing rule
-%   Dat:    array contents plate reader data
-%   Update 16/08/2016 by Yadira Boada
-
 tic
 
 % Parameter initialization / FIXED PARAMETERS
