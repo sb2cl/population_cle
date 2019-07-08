@@ -17,7 +17,7 @@ STO = 1;   % STO = 0 is deterministic simulation, and STO = 1 is stochastic.
 HISTO = 1; % HISTO = 1 for obtaining the steady state histogram
 TEMPO =  1; % TEMPO = 1 For obtaining the temporal response of the means and std
 TEMPOT =  0; % TEMPOT = 1 For obtaining the temporal response of all cells
-tic
+
 % Parameter initialization / FIXED PARAMETERS
 %%%%%%%%%%%%%%%%%%%%%%%%  General parameters  %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 tau = 40;                         % cell cycle [min]
@@ -105,9 +105,6 @@ pR_v = [0.2 0.4 2 4 10];
 X = transpose(combvec(D_v,pI_v,kdLux_v,alphaI_v,dR_v,pR_v,kA_v));
 %%
 for xpop=1:size(X,1)
-
-% Decision variables & parameters
-
 % With and without QS
 D = X(xpop,1); 
 % LuxI
@@ -118,7 +115,6 @@ alphaI = X(xpop,4);          % leakage of the repressor Plux 0.01-0.1
 % LuxR
 dR = X(xpop,5);            
 pR = X(xpop,6);
-
 kA = X(xpop,7);            
 
 % Writing parameters to a struct in the proper order to be read by the
@@ -130,10 +126,7 @@ param_out = struct( 'dI', dI,  'pI', pI, 'kI', kI, 'pN_luxI', pN_luxI, 'dmI', dm
 struct2csv_append(param_out, 'param.dat','W');
 
 
-% Excecuting the external C++ program langevin with 4 cores, and with the
-% files param.dat as input
-
-%Linux (carraixet)
+% Excecuting the external C++ program langevin with 4 cores, and with the files param.dat as input
 command = ['mpirun -np 4 ./langevin param.dat ' num2str(Ncells) ' ' num2str(ruido) ' ' num2str(ahl_e_0) ' ' num2str(STO) ' ' num2str(HISTO) ' ' num2str(TEMPO) ' ' num2str(TEMPOT)];
 
 % Langevin C++ output is predefined: output.dat with the following format
