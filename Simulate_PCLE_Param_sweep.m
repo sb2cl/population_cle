@@ -8,7 +8,7 @@
 % saves all the results in the variable Data, and file Data_DATE.mat
 %
 %   Update 22/11/2018 by YB and AV
-
+tic
 % Arguments of the langevin program.
 Ncells = 240;
 ruido = 0.15;
@@ -128,7 +128,7 @@ struct2csv_append(param_out, 'param.dat','W');
 
 % Excecuting the external C++ program langevin with 4 cores, and with the files param.dat as input
 command = ['mpirun -np 4 ./langevin param.dat ' num2str(Ncells) ' ' num2str(ruido) ' ' num2str(ahl_e_0) ' ' num2str(STO) ' ' num2str(HISTO) ' ' num2str(TEMPO) ' ' num2str(TEMPOT)];
-
+system(command);
 % Langevin C++ output is predefined: output.dat with the following format
 % also "mx1, std1, mx2, std2, mx3, std3, mx4, std4, mx5, std5" where, mx1 are
 % the means and vx are the stds.
