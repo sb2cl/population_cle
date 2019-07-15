@@ -61,7 +61,7 @@ void evolve_time(  grid_dist_id<2,  double, aggregate< double, double, double, d
 
 	    // Copy parameters from the distributed grid variable Parameters into the named variables
 
-	    // //I parameters
+	    // I parameters
 		double dI = g_dist_read.template get<Parameters>(key)[0];
 		double pI = g_dist_read.template get<Parameters>(key)[1];
 		double kI = g_dist_read.template get<Parameters>(key)[2];
@@ -69,7 +69,7 @@ void evolve_time(  grid_dist_id<2,  double, aggregate< double, double, double, d
 		double dmI = g_dist_read.template get<Parameters>(key)[4];
 		double kdLux = g_dist_read.template get<Parameters>(key)[5];
 		double alphaI = g_dist_read.template get<Parameters>(key)[6];
-	    //R Parameters
+	    // R Parameters
 		double dR = g_dist_read.template get<Parameters>(key)[7];
 		double pR = g_dist_read.template get<Parameters>(key)[8];
 		double cR =  g_dist_read.template get<Parameters>(key)[9];
@@ -222,7 +222,7 @@ void evolve_time(  grid_dist_id<2,  double, aggregate< double, double, double, d
 	v_cl.sum(  x4var );
 	v_cl.execute();
 
-	  // Put the mean and variances of x's  into the array
+	  // Put the mean and variances of x's  into the stats_vec array
 	stats_vec[0] = x1mean;
 	stats_vec[1] = x1var;
 	stats_vec[2] = x2mean;
@@ -396,10 +396,10 @@ int main(int argc, char* argv[])
 	  // Ghost
 	  Ghost<2, double> g(0.01);
 
-	  // Vector for x5 (noy parallel)
-	  openfpm::vector< double> x5;
-	  // Vector for the statistics, mean and variance
-	  openfpm::vector<openfpm::vector< double>> stats;
+	  // Vector for x5 (as normal variable, not a distriduted one)
+	  openfpm::vector<double> x5;
+	  // Vector for the statistics, mean and variance (as normal variable, not a distriduted one)
+	  openfpm::vector<openfpm::vector<double>> stats;
 	  // Vector for the histogram of I at final values
 	  openfpm::vector<double> I_hist;
 	    // Vector for the for the 4 states and all the cells (at time t) The first one is I
